@@ -154,6 +154,13 @@ completion is triggered by a real DOM click handler on the Confirm button,
 not by another tool call. This is what makes the "human stays in control of
 the outcome" claim literally true rather than just narrated.
 
+### Accessibility engineering note: modal dismiss, focus loss & aria-live race
+
+A subtle real-world bug in accessible web apps occurs when closing modals in conjunction with `aria-live` announcements:
+- When `#confirm-modal` closes, the Confirm button (which holds active focus) disappears from the accessible view.
+- Browsers drop focus to `<body>`, triggering verbose page-context narration that interrupts or completely drowns out the `aria-live` announcement.
+- Solution: `#booking-status` is configured with `tabindex="-1"`. Upon confirming or cancelling, focus is programmatically shifted to `#booking-status` immediately after hiding the modal and calling `render()`, right before invoking `announce()`. This creates a predictable focus anchor and allows screen readers (e.g. NVDA, VoiceOver) to clearly narrate the booking confirmation.
+
 ## Implementation order (do in this sequence, don't skip ahead)
 
 1. **`index.html` skeleton** — static layout only: header, provider search

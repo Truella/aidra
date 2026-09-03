@@ -77,6 +77,13 @@ If time runs short, everything else in this doc is cuttable. These three are not
   of a broken build blocking deployment
 - Deploy to Vercel
 
+### Accessibility & focus management engineering note
+
+When combining `aria-live` announcements with dialog/modal flows, focus management requires careful coordination:
+- When a confirmation modal closes, the focused element inside it (the Confirm button) is removed from the accessibility tree.
+- Without an explicit focus target, browsers default focus back to `<body>`, triggering full page-context narration that drowns out the polite `aria-live` announcement.
+- Fix: The `#booking-status` element is marked `tabindex="-1"`, and focus is programmatically shifted there immediately upon modal dismissal before calling `announce()`. This provides a stable landing point and guarantees screen reader announcements are heard clearly.
+
 **Explicitly cut from this build:** multi-provider support, auth/login,
 payment, multiple booking types, a dedicated mobile-responsiveness design
 pass, error-recovery flows beyond the one happy path.
