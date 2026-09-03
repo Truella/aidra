@@ -2,8 +2,8 @@
 import { SLOTS, PROVIDERS } from './mock-data.js';
 import { state, render, selectProvider, markConfirmed, markPendingConfirmation } from './state.js';
 import { renderCalendar } from './calendar.js';
-import { registerTools } from './tools.js';
-import { announce } from './announcer.js';
+import { registerTools, runAgentDemo } from './tools.js';
+import { announce, clearToolActivity } from './announcer.js';
 
 async function init() {
   // Populate provider selector dropdown
@@ -22,17 +22,24 @@ async function init() {
   wireManualSubmitButton();
   wireManualResetButton();
   wireConfirmModal();
+  wireAgentDemoButton();
 
-  // Register WebMCP tools if the API is available in this browser/context.
-  if ('modelContext' in document) {
-    await registerTools();
-  } else {
-    console.warn(
-      'document.modelContext is not available in this browser. ' +
-      'Enable chrome://flags/#enable-webmcp-testing in Chrome, or open this ' +
-      'page in an agent-enabled browser (e.g. ChatGPT\'s in-app browser) to test tool calls.'
-    );
-  }
+  // Register WebMCP tools (natively or via polyfill for test harness)
+  await registerTools();
+}
+
+function wireAgentDemoButton() {
+  const btn = document.getElementById('run-agent-demo-btn');
+  btn?.addEventListener('click', async () => {
+    btn.setAttribute('disabled', 'true');
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    try {
+      await runAgentDemo();
+    } finally {
+      btn.removeAttribute('disabled');
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  });
 }
 
 function populateProviderSelector() {
@@ -106,6 +113,7 @@ function wireManualResetButton() {
       const providerSlots = SLOTS.filter((s) => s.providerId === state.selectedProvider?.id);
       renderCalendar(providerSlots);
     }
+    clearToolActivity();
     render();
     document.getElementById('booking-status')?.focus();
     announce('Booking form and selected time slot have been reset.');

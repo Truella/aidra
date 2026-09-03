@@ -59,3 +59,12 @@ export function logToolActivity(toolName, status = '') {
   logList.appendChild(row);
   logList.scrollTop = logList.scrollHeight;
 }
+
+/**
+ * Reset the agent activity log back to its initial waiting state.
+ */
+export function clearToolActivity() {
+  const logList = document.getElementById('activity-log-list');
+  if (!logList) return;
+  logList.innerHTML = `<p id="activity-log-empty" class="text-xs text-ink/40 italic py-4 text-center">Waiting for agent tool invocations…</p>`;
+}

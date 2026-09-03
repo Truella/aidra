@@ -159,10 +159,16 @@
               <h2 id="activity-heading" class="text-sm font-semibold text-ink">Agent Activity</h2>
               <p class="text-[11px] text-ink/50">WebMCP live tool stream</p>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-teal-soft text-teal border border-teal-border/40">
-              <span class="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
-              Live
-            </span>
+            <div class="flex items-center gap-2">
+              <button id="run-agent-demo-btn" type="button"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-teal hover:bg-teal-hover active:scale-95 text-white transition-all shadow-sm">
+                <span>▶ Run Agent</span>
+              </button>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-teal-soft text-teal border border-teal-border/40">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
+                Live
+              </span>
+            </div>
           </div>
           <div id="activity-log-panel" class="min-h-[160px] max-h-[400px] overflow-y-auto pr-1">
             <div id="activity-log-list" class="space-y-1.5">
@@ -171,7 +177,7 @@
           </div>
           <div class="mt-3 pt-3 border-t border-ink/10 text-[11px] text-ink/40 flex items-center justify-between">
             <span>Protocol: WebMCP 1.0</span>
-            <span>Client: In-Page</span>
+            <span>Console: <code class="font-mono text-teal">runAgentDemo()</code></span>
           </div>
         </div>
       </aside>
