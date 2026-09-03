@@ -76,6 +76,7 @@ function wireConfirmModal() {
     markConfirmed();
     modal?.classList.add('hidden');
     render();
+    document.getElementById('booking-status')?.focus();
     announce('Appointment confirmed and booked.');
   });
 
@@ -83,6 +84,7 @@ function wireConfirmModal() {
     state.bookingStatus = 'idle';
     modal?.classList.add('hidden');
     render();
+    document.getElementById('booking-status')?.focus();
     announce('Booking cancelled. No appointment was made.');
   });
 }
