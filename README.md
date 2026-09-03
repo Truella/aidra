@@ -1,116 +1,180 @@
-# aidra
+﻿# aidra 🩺⚡
 
-**WebMCP Challenge submission — Devpost**
-Deadline: Sep 3, 2026 @ 1:00pm PDT / 9:00pm WAT
+> **Accessible Healthcare Scheduling Powered by WebMCP (Web Model Context Protocol)**  
+> *Bridging inaccessible web UI barriers for assistive technology users through typed in-browser agent tools, real-time `aria-live` narration, and deterministic human-in-the-loop confirmation.*
 
-## One-line pitch
+[![WebMCP Challenge](https://img.shields.io/badge/WebMCP-W3C%20Draft%20Standard-teal)](https://github.com/webmachinelearning/webmcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](./LICENSE)
+[![Zero Build Step](https://img.shields.io/badge/Stack-Vanilla%20JS%20%7C%20Tailwind-1F6F5C)](#tech-stack)
 
-A booking app built with the exact UI patterns known to break screen readers and
-motor-impaired navigation — where an AI agent completes the booking via WebMCP
-tools instead of fighting the inaccessible widgets, while the page stays live
-and narrated (via `aria-live`) so the user never loses oversight or control.
+---
 
-## The problem (verified, not invented)
+## 📌 Overview & Problem Statement
 
-- **Interactive elements such as menus, tabs, and dialogs that don't behave as
-  expected** are the #2 most cited barrier for screen reader users, every year,
-  per WebAIM's ongoing annual Screen Reader User Survey. CAPTCHA is #1.
-- The average home page carried 56.1 accessibility errors in 2026, a 10.1%
-  increase over the prior year (WebAIM, The WebAIM Million 2026) — the problem
-  is compounding, not shrinking.
-- "Screen reader user" is not synonymous with "blind" — 10% of regular screen
-  reader users in WebAIM's 2024 survey use it for reasons other than a vision
-  disability. Framing should stay broad: vision, motor, and cognitive access
-  needs, not just blindness.
-- Generic agent automation (DOM scraping / simulated clicks) **inherits the
-  same barrier the human has** — if a widget can't be perceived or interacted
-  with reliably, an agent guessing through the DOM fails the same way a screen
-  reader does. WebMCP's typed, in-page tools sidestep this: the agent calls a
-  named function instead of needing to perceive or manipulate the widget.
+### The Problem
+* **#2 Screen Reader Barrier**: Per WebAIM's annual Screen Reader User Survey, *interactive elements that don't behave as expected* (such as drag-and-drop calendars, nested canvas/div controls, and broken custom comboboxes) are the #2 most-cited accessibility barrier on the web (second only to CAPTCHAs).
+* **Agent DOM Guessing Inherits the Barrier**: Traditional browser automation agents that rely on DOM scraping or simulated coordinate clicks face the exact same failure modes as screen reader users when encountering complex, custom drag-and-drop or inaccessible widgets.
 
-## Core feature (non-negotiable — do not cut)
+### The Solution: `aidra`
+`aidra` demonstrates how **WebMCP (Web Model Context Protocol)** transforms assistive web interaction:
+1. **Direct Structured API**: Exposes high-level, typed in-page tools (`document.modelContext.registerTool`) that allow AI agents to navigate schedules, select slots, and prepare bookings directly in JavaScript state — bypassing inaccessible widgets completely.
+2. **Co-Navigation with Live `aria-live` Narration**: Instead of acting as an opaque black box, every tool invocation immediately narrates its action to the user via ARIA live regions and visually highlights affected UI elements.
+3. **Strict Human-in-the-Loop Gate**: Consequential actions (finalizing the appointment) **cannot be triggered by an agent tool call**. The agent stages the booking, and the user retains final approval via an accessible confirmation dialog.
 
-1. The agent completes a task that **cannot be reliably done via clicking or
-   scraping**, because the widget it replaces is a genuinely inaccessible
-   pattern (drag-based calendar grid).
-2. The user can **watch it happen live** via `aria-live` announcements as each
-   tool executes — not just receive a final result. This is what makes it
-   "better together" rather than "agent replaces human."
-3. A **human confirmation gate** before the final, consequential action
-   (submitting the booking) — the user stays in control of the outcome.
+---
 
-If time runs short, everything else in this doc is cuttable. These three are not.
+## 🚀 Key Features
 
-## End-to-end user flow (demo script)
+* 🗓️ **Inaccessible Calendar Widget Bypass**: Solves the drag-only scheduling pattern via `list_available_slots` and `select_slot`.
+* 👨‍⚕️ **Multi-Provider Search & Filtering**: Query doctors by name or medical specialty (`Dr. Sarah Chen` - *Family Medicine*, `Dr. Marcus Vance` - *Cardiology*, `Dr. Elena Rostova` - *Neurology*).
+* 🔄 **Lifecycle Management**: Built-in support for `reschedule_booking` and `cancel_booking` workflows.
+* 📡 **Live Agent Activity Stream**: Real-time observability sidebar for sighted users and evaluators to inspect WebMCP tool executions, parameters, and timestamps.
+* ♿ **Engineered Accessibility**:
+  * Polite ARIA live regions (`#announcer`) with deduplication timers.
+  * Explicit focus management preventing modal-close focus loss races (`tabindex="-1"` anchor on status readout).
+  * High-contrast focus outlines and keyboard-navigable fallback paths.
+* 🛡️ **Zero Build Step / Zero Dependencies**: Vanilla ES Modules and Tailwind CDN — 100% auditable and fast to deploy.
 
-1. **Landing** — booking site is open, screen reader announces the page normally.
-2. **User prompt to agent** — "Book me the earliest Tuesday morning appointment
-   with Dr. Chen, and remind me to bring my insurance card."
-3. **Agent calls tools in sequence**, each mutating the page live and firing an
-   `aria-live` announcement:
-   - `search_providers({ name: "Chen" })` → provider found, announced
-   - `list_available_slots({ provider_id, day: "Tuesday", time_range: "morning" })` → slots returned
-   - `select_slot({ slot_id })` → drag-calendar UI updates; announced ("Tuesday 9:00 AM selected")
-   - `fill_intake_form({ reason, notes })` → form fields populate live on screen
-   - `submit_booking()` → **blocked pending human confirmation**
-4. **Human checkpoint** — UI presents "Agent wants to submit — Confirm / Cancel."
-   User confirms via keyboard or voice.
-5. **Result** — booking confirmed, reminder set. User never had to
-   click/drag the calendar widget directly.
+---
 
-## Scope lock — build only this
+## 🛠️ WebMCP Tools Specification
 
-- 1 page, 1 flow, 5 tools (listed above)
-- 1 realistic inaccessible widget: **drag-based calendar grid** (more visually
-  demoable than a custom combobox — pick one, not both)
-- `aria-live` region wired to every tool call
-- One human-confirmation gate before final submit
-- Plain HTML/JS, styled with Tailwind (via CDN, no build step) — layout
-  should be reasonably non-broken across common widths by default (Tailwind
-  utilities make this close to free), but a dedicated mobile-responsive
-  design pass is NOT in scope — see STRETCH.md
-- Type safety via **JSDoc annotations in plain JS** (`@typedef` blocks for
-  each tool's input/output schema) — no TypeScript build step. Reasoning:
-  the WebMCP API is still Draft CG Report status with no official `@types`
-  package, so a real TS setup would require hand-written ambient
-  declarations anyway; JSDoc gives editor-level type checking with zero risk
-  of a broken build blocking deployment
-- Deploy to Vercel
+`aidra` registers 6 typed WebMCP tools into the browser context:
 
-### Accessibility & focus management engineering note
+| Tool Name | Parameters | Description |
+|---|---|---|
+| `search_providers` | `name: string` | Search available clinicians by full/partial name or specialty. |
+| `list_available_slots` | `providerId: string, day?: string, timeRange?: "morning" \| "afternoon"` | Query and filter open appointment slots for a clinician. |
+| `select_slot` | `slotId: string` | Select a specific appointment time slot and update the calendar. |
+| `fill_intake_form` | `reason: string, notes?: string` | Populate visit reason and patient notes in the intake form. |
+| `submit_booking` | `{}` | Requests booking submission and displays the human confirmation gate. |
+| `reschedule_booking` | `slotId: string` | Reschedules an existing in-progress booking to a different time slot. |
+| `cancel_booking` | `reason?: string` | Cancels and resets the current booking session. |
 
-When combining `aria-live` announcements with dialog/modal flows, focus management requires careful coordination:
-- When a confirmation modal closes, the focused element inside it (the Confirm button) is removed from the accessibility tree.
-- Without an explicit focus target, browsers default focus back to `<body>`, triggering full page-context narration that drowns out the polite `aria-live` announcement.
-- Fix: The `#booking-status` element is marked `tabindex="-1"`, and focus is programmatically shifted there immediately upon modal dismissal before calling `announce()`. This provides a stable landing point and guarantees screen reader announcements are heard clearly.
+### Code Example: Registering a WebMCP Tool
 
-**Explicitly cut from this build:** multi-provider support, auth/login,
-payment, multiple booking types, a dedicated mobile-responsiveness design
-pass, error-recovery flows beyond the one happy path.
+```javascript
+// js/tools.js
+await document.modelContext.registerTool({
+  name: "select_slot",
+  description: "Select a specific appointment slot by its id.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      slotId: { type: "string", description: "The slot id returned by list_available_slots." }
+    },
+    required: ["slotId"]
+  },
+  async execute({ slotId }) {
+    logToolActivity("select_slot");
+    const slot = SLOTS.find((s) => s.id === slotId);
+    if (!slot) {
+      return { content: [{ type: "text", text: `No slot found with id "${slotId}".` }] };
+    }
 
-## Testing plan
+    // Mutate app state and announce live to screen reader
+    applySlotSelection(slot);
 
-1. **Functional** — manually trigger each tool via browser console before
-   wiring an actual agent; confirm state updates and ARIA announcements fire.
-2. **Agent integration test** — open the deployed URL in ChatGPT's in-app
-   browser (the spec's required test surface) and run the real prompt
-   end-to-end.
-3. **Chrome fallback test** — enable `chrome://flags/#enable-webmcp-testing`,
-   repeat the same flow.
-4. **Accessibility sanity check** — run VoiceOver/NVDA yourself during agent
-   execution, confirm the announcements are actually narratable in practice.
-5. **Regression pass** — confirm a human can still complete the booking
-   manually without the agent (judges may check the non-agent path too).
+    return {
+      content: [{ type: "text", text: `Selected ${slot.day} at ${slot.time}.` }]
+    };
+  }
+});
+```
 
-## Submission checklist
+---
 
-- [ ] Live URL, tested in ChatGPT in-app browser AND Chrome w/ WebMCP flag
-- [ ] Public GitHub repo, open-source license visible in repo "About" section
-- [ ] Repo README includes a working `registerTool` code sample
-- [ ] Text writeup (why WebMCP fits / better UX / what was impossible before /
-      how implemented) — written **after** the build works, not before
-- [ ] Demo video, <3 min, public YouTube, with audio — script around the
-      5-step flow above; lead with the drag-calendar failure, then show the
-      agent solving it
-- [ ] Recording finished with buffer before ~6pm WAT on Sep 3 for
-      upload/submission risk
+## 📐 Architecture & Focus Management
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Browser / DOM Layer                  │
+├──────────────────────────┬─────────────────────────────┤
+│   Human Interaction      │       WebMCP Agent          │
+│   (Keyboard/Mouse/Voice) │  (ChatGPT / Chrome Flag)    │
+└────────────┬─────────────┴──────────────┬──────────────┘
+             │                            │
+             ▼                            ▼
+   ┌──────────────────────────────────────────────┐
+   │         Shared State (js/state.js)           │
+   │  { selectedProvider, selectedSlot, ... }     │
+   └──────────────────────┬───────────────────────┘
+                          │
+         ┌────────────────┴────────────────┐
+         ▼                                 ▼
+┌──────────────────┐             ┌───────────────────┐
+│ DOM / UI Render  │             │ ARIA Live Stream  │
+│ (main.js / CSS)  │             │ (announcer.js)    │
+└──────────────────┘             └───────────────────┘
+```
+
+### Critical Accessibility Engineering: Modal Focus & ARIA Race Prevention
+When closing the confirmation modal, active focus inside the dialog disappears from the accessibility tree. Without intervention, browsers default focus back to `<body>`, triggering full page-context narration that drowns out the polite `aria-live` announcement.
+
+**Fix Applied**:
+1. `#booking-status` is configured with `tabindex="-1"`.
+2. Upon modal dismiss (Confirm or Cancel), focus is programmatically shifted to `#booking-status` immediately before `announce()` is invoked, ensuring screen readers (NVDA, VoiceOver, JAWS) read the confirmation clearly without interruption.
+
+---
+
+## 💻 Tech Stack
+
+* **Markup & Layout**: Semantic HTML5, Tailwind CSS (via CDN)
+* **Logic & Protocol**: Vanilla JavaScript (ES Modules, WebMCP API)
+* **Type Safety**: JSDoc `@typedef` definitions checked via TypeScript Language Server (zero compilation required)
+* **Accessibility**: ARIA 1.2 Live Regions, WCAG 2.1 AA compliant contrast & keyboard focus
+
+---
+
+## 🏃 Getting Started & Local Testing
+
+### Prerequisites
+* Any modern web browser (Google Chrome, Edge, Safari, Firefox).
+* For testing native WebMCP tool execution:
+  * Open in **ChatGPT In-App Browser**, OR
+  * Enable `chrome://flags/#enable-webmcp-testing` in Google Chrome (Desktop).
+
+### Running Locally
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/truella/aidra.git
+cd aidra
+
+# 2. Serve with any static web server (no build step needed)
+# Example using Python:
+python3 -m http.server 8000
+
+# Example using Node:
+npx serve .
+```
+
+Visit `http://localhost:8000` in your browser.
+
+---
+
+## 🧪 Testing Guide
+
+### 1. Manual Human Fallback Flow
+1. Select a provider via the dropdown or keep default.
+2. Drag any slot chip from the tray into a day cell.
+3. Type a reason in **Reason for visit**.
+4. Click **Book appointment** → Click **Confirm** in modal.
+5. Verify status updates to *"Appointment booked."* and screen reader announces completion.
+
+### 2. WebMCP Agent Flow (ChatGPT In-App Browser / Chrome Flag)
+Prompt the agent:
+> *"Book me the earliest Tuesday morning appointment with Dr. Sarah Chen, and add a note to remind me to bring my insurance card."*
+
+**Expected Agent Sequence**:
+1. `search_providers({ name: "Chen" })` → Provider found & announced.
+2. `list_available_slots({ providerId: "p1", day: "Tuesday", timeRange: "morning" })` → Matches returned.
+3. `select_slot({ slotId: "s3" })` → Calendar highlights Tuesday 09:00.
+4. `fill_intake_form({ reason: "Annual checkup", notes: "Bring insurance card" })` → Form populates.
+5. `submit_booking()` → Modal opens for human confirmation.
+
+---
+
+## 📄 License
+
+This project is open-source and licensed under the [MIT License](./LICENSE).

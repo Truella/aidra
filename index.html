@@ -69,14 +69,23 @@
             <span class="text-xs text-ink/40">Verified Clinician</span>
           </div>
           <div id="provider-panel" class="rounded-xl border border-ink/10 bg-white p-5 shadow-sm transition-all duration-300">
-            <p id="provider-empty" class="text-ink/40 text-sm italic">No provider selected yet.</p>
-            <div id="provider-result" class="hidden flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-teal-soft flex items-center justify-center text-teal font-semibold text-sm border border-teal-border">
-                Dr
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-teal-soft flex items-center justify-center text-teal font-semibold text-sm border border-teal-border">
+                  Dr
+                </div>
+                <div>
+                  <p class="font-semibold text-ink text-base" id="provider-name"></p>
+                  <p class="text-xs font-medium text-teal" id="provider-specialty"></p>
+                </div>
               </div>
-              <div>
-                <p class="font-semibold text-ink text-base" id="provider-name"></p>
-                <p class="text-xs font-medium text-teal" id="provider-specialty"></p>
+              
+              <!-- Manual provider selector -->
+              <div class="flex items-center gap-2">
+                <label for="provider-select" class="text-xs font-medium text-ink/60 whitespace-nowrap">Switch Doctor:</label>
+                <select id="provider-select" class="rounded-lg border border-ink/20 bg-paper px-3 py-1.5 text-xs font-medium text-ink transition-colors focus:border-teal focus:ring-2 focus:ring-teal/20 focus:outline-none">
+                  <!-- populated by main.js -->
+                </select>
               </div>
             </div>
           </div>
@@ -132,6 +141,10 @@
             <button id="submit-button" disabled
               class="rounded-xl bg-teal hover:bg-teal-hover active:scale-[0.98] text-white px-6 py-3 text-sm font-semibold transition-all duration-150 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-teal disabled:active:scale-100">
               Book appointment
+            </button>
+            <button id="reset-button" type="button"
+              class="rounded-xl border border-ink/20 hover:bg-paper active:scale-[0.98] text-ink/70 hover:text-ink px-4 py-3 text-sm font-medium transition-all duration-150">
+              Reset form
             </button>
             <p id="booking-status" tabindex="-1" class="text-xs font-medium text-ink/70" role="status"></p>
           </div>

@@ -6,16 +6,21 @@ import { registerTools } from './tools.js';
 import { announce } from './announcer.js';
 
 async function init() {
+  // Populate provider selector dropdown
+  populateProviderSelector();
+
   // Auto-select the default provider on load.
   selectProvider(PROVIDERS[0]);
 
-  // Initial render of the calendar with the (only) provider's slots.
+  // Initial render of the calendar with the provider's slots.
   const providerSlots = SLOTS.filter((s) => s.providerId === PROVIDERS[0].id);
   renderCalendar(providerSlots);
   render();
 
+  wireProviderSelector();
   wireManualIntakeInputs();
   wireManualSubmitButton();
+  wireManualResetButton();
   wireConfirmModal();
 
   // Register WebMCP tools if the API is available in this browser/context.
@@ -28,6 +33,32 @@ async function init() {
       'page in an agent-enabled browser (e.g. ChatGPT\'s in-app browser) to test tool calls.'
     );
   }
+}
+
+function populateProviderSelector() {
+  const select = /** @type {HTMLSelectElement|null} */ (document.getElementById('provider-select'));
+  if (!select) return;
+  select.innerHTML = '';
+  PROVIDERS.forEach((p) => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `${p.name} (${p.specialty})`;
+    select.appendChild(opt);
+  });
+}
+
+function wireProviderSelector() {
+  const select = /** @type {HTMLSelectElement|null} */ (document.getElementById('provider-select'));
+  select?.addEventListener('change', () => {
+    const chosen = PROVIDERS.find((p) => p.id === select.value);
+    if (!chosen) return;
+    selectProvider(chosen);
+    state.selectedSlot = null; // reset slot if provider changes
+    const providerSlots = SLOTS.filter((s) => s.providerId === chosen.id);
+    renderCalendar(providerSlots);
+    render();
+    announce(`Switched to ${chosen.name}, ${chosen.specialty}. Available appointment times updated.`);
+  });
 }
 
 function wireManualIntakeInputs() {
@@ -61,6 +92,23 @@ function wireManualSubmitButton() {
       summary.textContent = `${state.selectedProvider.name} — ${state.selectedSlot.day} at ${state.selectedSlot.time}. Reason: ${state.intakeForm.reason}.`;
       modal.classList.remove('hidden');
     }
+  });
+}
+
+function wireManualResetButton() {
+  const button = document.getElementById('reset-button');
+  button?.addEventListener('click', () => {
+    state.selectedSlot = null;
+    state.bookingStatus = 'idle';
+    state.intakeForm = { reason: '', notes: '' };
+
+    if (state.selectedProvider) {
+      const providerSlots = SLOTS.filter((s) => s.providerId === state.selectedProvider?.id);
+      renderCalendar(providerSlots);
+    }
+    render();
+    document.getElementById('booking-status')?.focus();
+    announce('Booking form and selected time slot have been reset.');
   });
 }
 

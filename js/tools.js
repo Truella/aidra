@@ -2,7 +2,7 @@
 import './types.js';
 import { PROVIDERS, SLOTS } from './mock-data.js';
 import { state, selectProvider, fillIntakeForm, markPendingConfirmation, render } from './state.js';
-import { applySlotSelection } from './calendar.js';
+import { applySlotSelection, renderCalendar } from './calendar.js';
 import { announce, logToolActivity } from './announcer.js';
 
 /**
@@ -30,7 +30,8 @@ export async function registerTools() {
     async execute({ name }) {
       logToolActivity('search_providers');
       const match = PROVIDERS.find((p) =>
-        p.name.toLowerCase().includes(name.toLowerCase())
+        p.name.toLowerCase().includes(name.toLowerCase()) ||
+        p.specialty.toLowerCase().includes(name.toLowerCase())
       );
 
       if (!match) {
@@ -38,6 +39,8 @@ export async function registerTools() {
       }
 
       selectProvider(match);
+      const providerSlots = SLOTS.filter((s) => s.providerId === match.id);
+      renderCalendar(providerSlots);
       render({ highlight: 'provider' });
       announce(`Provider found: ${match.name}, ${match.specialty}.`);
 
@@ -119,6 +122,73 @@ export async function registerTools() {
       applySlotSelection(slot);
 
       return { content: [{ type: 'text', text: `Selected ${slot.day} at ${slot.time}.` }] };
+    },
+  });
+
+  await document.modelContext.registerTool({
+    name: 'reschedule_booking',
+    description: 'Reschedule an existing booking to a new time slot by its slotId.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slotId: { type: 'string', description: 'The new slot id to reschedule to.' },
+      },
+      required: ['slotId'],
+    },
+    /**
+     * @param {import('./types.js').RescheduleBookingInput} input
+     * @returns {Promise<import('./types.js').ToolResult>}
+     */
+    async execute({ slotId }) {
+      logToolActivity('reschedule_booking');
+      const newSlot = SLOTS.find((s) => s.id === slotId);
+      if (!newSlot) {
+        return { content: [{ type: 'text', text: `No slot found with id "${slotId}".` }] };
+      }
+
+      state.bookingStatus = 'idle';
+      applySlotSelection(newSlot);
+      announce(`Appointment rescheduled to ${newSlot.day} at ${newSlot.time}. Ready to submit.`);
+
+      return {
+        content: [{ type: 'text', text: `Appointment rescheduled to ${newSlot.day} at ${newSlot.time}.` }],
+      };
+    },
+  });
+
+  await document.modelContext.registerTool({
+    name: 'cancel_booking',
+    description: 'Cancel the current booking or reset an in-progress booking session.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string', description: 'Optional reason for cancellation.' },
+      },
+    },
+    /**
+     * @param {import('./types.js').CancelBookingInput} input
+     * @returns {Promise<import('./types.js').ToolResult>}
+     */
+    async execute({ reason } = {}) {
+      logToolActivity('cancel_booking', 'Cancelled');
+      state.selectedSlot = null;
+      state.bookingStatus = 'idle';
+      state.intakeForm = { reason: '', notes: '' };
+      
+      const modal = document.getElementById('confirm-modal');
+      modal?.classList.add('hidden');
+      
+      if (state.selectedProvider) {
+        const providerSlots = SLOTS.filter((s) => s.providerId === state.selectedProvider?.id);
+        renderCalendar(providerSlots);
+      }
+      render();
+      document.getElementById('booking-status')?.focus();
+      announce('Booking cancelled and reset.');
+
+      return {
+        content: [{ type: 'text', text: `Booking cancelled successfully.${reason ? ` Reason: ${reason}` : ''}` }],
+      };
     },
   });
 

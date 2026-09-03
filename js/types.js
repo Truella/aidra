@@ -42,6 +42,16 @@
  */
 
 /**
+ * @typedef {Object} RescheduleBookingInput
+ * @property {string} slotId
+ */
+
+/**
+ * @typedef {Object} CancelBookingInput
+ * @property {string} [reason]
+ */
+
+/**
  * @typedef {Object} ToolTextContent
  * @property {"text"} type
  * @property {string} text

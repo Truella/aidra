@@ -34,20 +34,16 @@ export function render(opts = {}) {
 }
 
 function renderProvider() {
-  const empty = document.getElementById('provider-empty');
-  const result = document.getElementById('provider-result');
   const nameEl = document.getElementById('provider-name');
   const specialtyEl = document.getElementById('provider-specialty');
-  if (!empty || !result || !nameEl || !specialtyEl) return;
+  const selectEl = /** @type {HTMLSelectElement|null} */ (document.getElementById('provider-select'));
 
   if (state.selectedProvider) {
-    empty.classList.add('hidden');
-    result.classList.remove('hidden');
-    nameEl.textContent = state.selectedProvider.name;
-    specialtyEl.textContent = state.selectedProvider.specialty;
-  } else {
-    empty.classList.remove('hidden');
-    result.classList.add('hidden');
+    if (nameEl) nameEl.textContent = state.selectedProvider.name;
+    if (specialtyEl) specialtyEl.textContent = state.selectedProvider.specialty;
+    if (selectEl && selectEl.value !== state.selectedProvider.id) {
+      selectEl.value = state.selectedProvider.id;
+    }
   }
 }
 
