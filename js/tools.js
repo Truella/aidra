@@ -80,6 +80,33 @@ export async function registerTools() {
   });
 
   await document.modelContext.registerTool({
+    name: 'list_providers',
+    description: "List all available providers in the clinic.",
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+    /**
+     * @returns {Promise<import('./types.js').ToolResult>}
+     */
+    async execute() {
+      logToolActivity('list_providers');
+      
+      const summary = PROVIDERS.map(p => `${p.name} (${p.specialty}), id: ${p.id}`).join('\n');
+      announce(`Listed ${PROVIDERS.length} providers.`);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Available providers:\n${summary}`,
+          },
+        ],
+      };
+    },
+  });
+
+  await document.modelContext.registerTool({
     name: 'list_available_slots',
     description: "List a provider's available appointment slots, optionally filtered by day and time of day.",
     inputSchema: {

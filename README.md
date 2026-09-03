@@ -1,4 +1,4 @@
-﻿# aidra 🩺⚡
+# aidra 🩺⚡
 
 > **Accessible Healthcare Scheduling Powered by WebMCP (Web Model Context Protocol)**  
 > *Bridging inaccessible web UI barriers for assistive technology users through typed in-browser agent tools, real-time `aria-live` narration, and deterministic human-in-the-loop confirmation.*
@@ -39,10 +39,11 @@
 
 ## 🛠️ WebMCP Tools Specification
 
-`aidra` registers 7 typed WebMCP tools into the browser context:
+`aidra` registers 8 typed WebMCP tools into the browser context:
 
 | Tool Name | Parameters | Description |
 |---|---|---|
+| `list_providers` | `{}` | List all available clinicians in the clinic. |
 | `search_providers` | `name: string` | Search available clinicians by full/partial name or specialty. |
 | `list_available_slots` | `providerId: string, day?: string, timeRange?: "morning" \| "afternoon"` | Query and filter open appointment slots for a clinician. |
 | `select_slot` | `slotId: string` | Select a specific appointment time slot and update the calendar. |
