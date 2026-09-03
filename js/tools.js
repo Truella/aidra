@@ -3,7 +3,7 @@ import './types.js';
 import { PROVIDERS, SLOTS } from './mock-data.js';
 import { state, selectProvider, fillIntakeForm, markPendingConfirmation, render } from './state.js';
 import { applySlotSelection } from './calendar.js';
-import { announce } from './announcer.js';
+import { announce, logToolActivity } from './announcer.js';
 
 /**
  * Register all WebMCP tools. Called once from main.js on page load.
@@ -28,6 +28,7 @@ export async function registerTools() {
      * @returns {Promise<import('./types.js').ToolResult>}
      */
     async execute({ name }) {
+      logToolActivity('search_providers');
       const match = PROVIDERS.find((p) =>
         p.name.toLowerCase().includes(name.toLowerCase())
       );
@@ -68,6 +69,7 @@ export async function registerTools() {
      * @returns {Promise<import('./types.js').ToolResult>}
      */
     async execute({ providerId, day, timeRange }) {
+      logToolActivity('list_available_slots');
       const matches = SLOTS.filter((s) => {
         if (s.providerId !== providerId) return false;
         if (day && s.day.toLowerCase() !== day.toLowerCase()) return false;
@@ -108,6 +110,7 @@ export async function registerTools() {
      * @returns {Promise<import('./types.js').ToolResult>}
      */
     async execute({ slotId }) {
+      logToolActivity('select_slot');
       const slot = SLOTS.find((s) => s.id === slotId);
       if (!slot) {
         return { content: [{ type: 'text', text: `No slot found with id "${slotId}".` }] };
@@ -135,6 +138,7 @@ export async function registerTools() {
      * @returns {Promise<import('./types.js').ToolResult>}
      */
     async execute({ reason, notes }) {
+      logToolActivity('fill_intake_form');
       fillIntakeForm(reason, notes ?? '');
       render({ highlight: 'intake' });
       announce(`Visit reason set to: ${reason}.`);
@@ -152,6 +156,7 @@ export async function registerTools() {
      * @returns {Promise<import('./types.js').ToolResult>}
      */
     async execute() {
+      logToolActivity('submit_booking', 'Pending confirmation');
       if (!state.selectedProvider || !state.selectedSlot || !state.intakeForm.reason) {
         return {
           content: [

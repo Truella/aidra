@@ -34,61 +34,87 @@
     <p class="text-sm text-ink/60">Book an appointment</p>
   </header>
 
-  <main class="max-w-2xl mx-auto px-6 py-8 space-y-10">
+  <main class="max-w-5xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left / Main column: booking flow -->
+      <div class="lg:col-span-8 space-y-10">
+        <!-- Provider search -->
+        <section aria-labelledby="provider-heading">
+          <h2 id="provider-heading" class="text-sm font-medium text-ink/60 mb-3">Provider</h2>
+          <div id="provider-panel" class="rounded-lg border border-ink/10 p-4 transition-shadow">
+            <p id="provider-empty" class="text-ink/50 text-sm">No provider selected yet.</p>
+            <div id="provider-result" class="hidden">
+              <p class="font-medium" id="provider-name"></p>
+              <p class="text-sm text-ink/60" id="provider-specialty"></p>
+            </div>
+          </div>
+        </section>
 
-    <!-- Provider search -->
-    <section aria-labelledby="provider-heading">
-      <h2 id="provider-heading" class="text-sm font-medium text-ink/60 mb-3">Provider</h2>
-      <div id="provider-panel" class="rounded-lg border border-ink/10 p-4 transition-shadow">
-        <p id="provider-empty" class="text-ink/50 text-sm">No provider selected yet.</p>
-        <div id="provider-result" class="hidden">
-          <p class="font-medium" id="provider-name"></p>
-          <p class="text-sm text-ink/60" id="provider-specialty"></p>
-        </div>
+        <!-- Calendar: the intentionally inaccessible widget -->
+        <section aria-labelledby="calendar-heading">
+          <h2 id="calendar-heading" class="text-sm font-medium text-ink/60 mb-1">Choose a time</h2>
+          <p class="text-xs text-ink/40 mb-3">Drag an available slot onto a day to select it.</p>
+          <div id="calendar-panel" class="rounded-lg border border-ink/10 p-4 transition-shadow">
+            <div id="calendar-grid" class="grid grid-cols-3 gap-2" role="presentation">
+              <!-- populated by calendar.js -->
+            </div>
+            <div id="slot-tray" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-ink/10" role="presentation">
+              <!-- draggable slot chips populated by calendar.js -->
+            </div>
+          </div>
+          <p id="selected-slot-readout" class="text-sm text-teal mt-2 font-medium" aria-hidden="true"></p>
+        </section>
+
+        <!-- Intake form -->
+        <section aria-labelledby="intake-heading">
+          <h2 id="intake-heading" class="text-sm font-medium text-ink/60 mb-3">Visit details</h2>
+          <div id="intake-panel" class="rounded-lg border border-ink/10 p-4 space-y-3 transition-shadow">
+            <div>
+              <label for="reason-input" class="block text-sm text-ink/70 mb-1">Reason for visit</label>
+              <input id="reason-input" type="text" class="w-full rounded border border-ink/20 px-3 py-2 text-sm"
+                     placeholder="e.g. Annual check-up" />
+            </div>
+            <div>
+              <label for="notes-input" class="block text-sm text-ink/70 mb-1">Notes (optional)</label>
+              <textarea id="notes-input" class="w-full rounded border border-ink/20 px-3 py-2 text-sm" rows="2"
+                        placeholder="Anything the provider should know"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submit -->
+        <section>
+          <button id="submit-button" disabled
+            class="rounded-lg bg-teal text-white px-5 py-2.5 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+            Book appointment
+          </button>
+          <p id="booking-status" tabindex="-1" class="text-sm text-ink/60 mt-2" role="status"></p>
+        </section>
       </div>
-    </section>
 
-    <!-- Calendar: the intentionally inaccessible widget -->
-    <section aria-labelledby="calendar-heading">
-      <h2 id="calendar-heading" class="text-sm font-medium text-ink/60 mb-1">Choose a time</h2>
-      <p class="text-xs text-ink/40 mb-3">Drag an available slot onto a day to select it.</p>
-      <div id="calendar-panel" class="rounded-lg border border-ink/10 p-4 transition-shadow">
-        <div id="calendar-grid" class="grid grid-cols-3 gap-2" role="presentation">
-          <!-- populated by calendar.js -->
+      <!-- Right column: Agent Activity Log (WebMCP Observability) -->
+      <aside aria-labelledby="activity-heading" class="lg:col-span-4 lg:sticky lg:top-8">
+        <div class="rounded-xl border border-ink/10 bg-white/70 backdrop-blur-sm p-4 shadow-sm">
+          <div class="flex items-center justify-between pb-3 border-b border-ink/10 mb-3">
+            <div>
+              <h2 id="activity-heading" class="text-sm font-semibold text-ink">Agent Activity</h2>
+              <p class="text-[11px] text-ink/50">WebMCP live tool stream</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-teal-soft text-teal">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
+              Live
+            </span>
+          </div>
+          <div id="activity-log-panel" class="min-h-[140px] max-h-[380px] overflow-y-auto pr-1">
+            <div id="activity-log-list" class="space-y-1">
+              <p id="activity-log-empty" class="text-xs text-ink/40 italic py-2 text-center">Waiting for agent tool invocations…</p>
+            </div>
+          </div>
         </div>
-        <div id="slot-tray" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-ink/10" role="presentation">
-          <!-- draggable slot chips populated by calendar.js -->
-        </div>
-      </div>
-      <p id="selected-slot-readout" class="text-sm text-teal mt-2 font-medium" aria-hidden="true"></p>
-    </section>
+      </aside>
 
-    <!-- Intake form -->
-    <section aria-labelledby="intake-heading">
-      <h2 id="intake-heading" class="text-sm font-medium text-ink/60 mb-3">Visit details</h2>
-      <div id="intake-panel" class="rounded-lg border border-ink/10 p-4 space-y-3 transition-shadow">
-        <div>
-          <label for="reason-input" class="block text-sm text-ink/70 mb-1">Reason for visit</label>
-          <input id="reason-input" type="text" class="w-full rounded border border-ink/20 px-3 py-2 text-sm"
-                 placeholder="e.g. Annual check-up" />
-        </div>
-        <div>
-          <label for="notes-input" class="block text-sm text-ink/70 mb-1">Notes (optional)</label>
-          <textarea id="notes-input" class="w-full rounded border border-ink/20 px-3 py-2 text-sm" rows="2"
-                    placeholder="Anything the provider should know"></textarea>
-        </div>
-      </div>
-    </section>
-
-    <!-- Submit -->
-    <section>
-      <button id="submit-button" disabled
-        class="rounded-lg bg-teal text-white px-5 py-2.5 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
-        Book appointment
-      </button>
-      <p id="booking-status" tabindex="-1" class="text-sm text-ink/60 mt-2" role="status"></p>
-    </section>
-
+    </div>
   </main>
 
   <!-- Confirmation modal: the human-control gate. Only a real click here completes a booking. -->

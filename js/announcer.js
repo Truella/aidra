@@ -30,3 +30,29 @@ export function flashAgentHighlight(el) {
     el.classList.remove('agent-highlight');
   }, 1400);
 }
+
+/**
+ * Log a WebMCP tool execution to the on-page activity panel.
+ * @param {string} toolName
+ * @param {string} [status]
+ */
+export function logToolActivity(toolName, status = '') {
+  const logList = document.getElementById('activity-log-list');
+  const emptyMessage = document.getElementById('activity-log-empty');
+  if (!logList) return;
+
+  if (emptyMessage) {
+    emptyMessage.remove();
+  }
+
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const row = document.createElement('div');
+  row.className = 'flex items-center justify-between py-1.5 border-b border-ink/5 last:border-none text-xs';
+  row.innerHTML = `
+    <span class="font-mono text-teal font-medium">${toolName}</span>
+    <span class="text-ink/50 text-[11px]">${status || time}</span>
+  `;
+
+  logList.appendChild(row);
+  logList.scrollTop = logList.scrollHeight;
+}
