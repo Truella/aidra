@@ -75,6 +75,11 @@ export async function registerTools() {
         return true;
       });
 
+      announce(matches.length > 0
+        ? `${matches.length} available time${matches.length === 1 ? '' : 's'} found${day ? ` on ${day}` : ''}.`
+        : `No available times found${day ? ` on ${day}` : ''}.`
+      );
+
       return {
         content: [
           {
