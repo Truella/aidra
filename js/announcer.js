@@ -3,13 +3,20 @@
 const announcerEl = document.getElementById('announcer');
 
 /**
- * Announce a message via the aria-live region.
+ * Announce a message via the aria-live region and update the visual narration caption.
  * Clears then re-sets on a short delay so screen readers re-announce even
  * if the message text is identical to the previous announcement — a known
  * ARIA gotcha (identical text back-to-back is sometimes not re-announced).
  * @param {string} message
  */
 export function announce(message) {
+  const captionEl = document.getElementById('narration-caption');
+  if (captionEl) {
+    captionEl.textContent = `"${message}"`;
+    captionEl.classList.remove('italic', 'text-ink/40');
+    captionEl.classList.add('text-teal', 'font-medium');
+  }
+
   if (!announcerEl) return;
   announcerEl.textContent = '';
   window.setTimeout(() => {
@@ -61,10 +68,19 @@ export function logToolActivity(toolName, status = '') {
 }
 
 /**
- * Reset the agent activity log back to its initial waiting state.
+ * Reset the agent activity log and narration caption back to their initial waiting state.
  */
 export function clearToolActivity() {
   const logList = document.getElementById('activity-log-list');
-  if (!logList) return;
-  logList.innerHTML = `<p id="activity-log-empty" class="text-xs text-ink/40 italic py-4 text-center">Waiting for agent tool invocations…</p>`;
+  if (logList) {
+    logList.innerHTML = `<p id="activity-log-empty" class="text-xs text-ink/40 italic py-4 text-center">Waiting for agent tool invocations…</p>`;
+  }
+
+  const captionEl = document.getElementById('narration-caption');
+  if (captionEl) {
+    captionEl.textContent = 'Ready for user interaction or agent tool calls…';
+    captionEl.classList.add('italic');
+    captionEl.classList.remove('font-medium', 'text-teal');
+    captionEl.classList.add('text-ink/40');
+  }
 }
