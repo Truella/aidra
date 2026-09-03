@@ -2,14 +2,72 @@
 
 const announcerEl = document.getElementById('announcer');
 
+/** @type {{message: string}[]} */
+const announceQueue = [];
+let isProcessingQueue = false;
+
 /**
- * Announce a message via the aria-live region and update the visual narration caption.
- * Clears then re-sets on a short delay so screen readers re-announce even
- * if the message text is identical to the previous announcement — a known
- * ARIA gotcha (identical text back-to-back is sometimes not re-announced).
+ * Calculate a comfortable pause so a screen reader (or a sighted judge
+ * reading the caption) has time to actually finish an announcement before
+ * the next one starts. ~150-180 words/min speech rate.
+ * @param {string} text
+ * @returns {number} milliseconds
+ */
+export function getSpeechDelay(text) {
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(2200, wordCount * 380 + 800);
+}
+
+/**
+ * Announce a message via the aria-live region and update the visual
+ * narration caption. Queued and serialized: if a previous announcement
+ * hasn't finished its estimated speaking time yet, this one waits — so
+ * fast, back-to-back agent tool calls never cut off or overwrite a
+ * narration mid-speech. This keeps narration in sync with actual
+ * execution speed, whether driven by runAgentDemo() or a real agent.
  * @param {string} message
  */
 export function announce(message) {
+  announceQueue.push({ message });
+  if (!isProcessingQueue) {
+    processAnnounceQueue();
+  }
+}
+
+async function processAnnounceQueue() {
+  isProcessingQueue = true;
+  while (announceQueue.length > 0) {
+    const next = announceQueue.shift();
+    if (!next) break;
+    showAnnouncement(next.message);
+    await new Promise((resolve) => setTimeout(resolve, getSpeechDelay(next.message)));
+  }
+  isProcessingQueue = false;
+}
+
+/**
+ * Returns a promise that resolves once all currently queued announcements
+ * have finished speaking. Use this in runAgentDemo() between tool steps so
+ * DOM mutations and narration stay in sync.
+ * @returns {Promise<void>}
+ */
+export function waitForAnnouncements() {
+  return new Promise((resolve) => {
+    function check() {
+      if (!isProcessingQueue && announceQueue.length === 0) {
+        resolve();
+      } else {
+        setTimeout(check, 100);
+      }
+    }
+    check();
+  });
+}
+
+/**
+ * @param {string} message
+ */
+function showAnnouncement(message) {
   const captionEl = document.getElementById('narration-caption');
   if (captionEl) {
     captionEl.textContent = `"${message}"`;
@@ -68,9 +126,14 @@ export function logToolActivity(toolName, status = '') {
 }
 
 /**
- * Reset the agent activity log and narration caption back to their initial waiting state.
+ * Reset the agent activity log and narration caption back to their initial
+ * waiting state. Also clears any pending queued announcements so a reset
+ * (e.g. cancel_booking) doesn't leave stale narration to play out afterward.
  */
 export function clearToolActivity() {
+  announceQueue.length = 0;
+  isProcessingQueue = false;
+
   const logList = document.getElementById('activity-log-list');
   if (logList) {
     logList.innerHTML = `<p id="activity-log-empty" class="text-xs text-ink/40 italic py-4 text-center">Waiting for agent tool invocations…</p>`;

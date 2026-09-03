@@ -3,7 +3,7 @@ import './types.js';
 import { PROVIDERS, SLOTS } from './mock-data.js';
 import { state, selectProvider, fillIntakeForm, markPendingConfirmation, render } from './state.js';
 import { applySlotSelection, renderCalendar } from './calendar.js';
-import { announce, logToolActivity, clearToolActivity } from './announcer.js';
+import { announce, logToolActivity, clearToolActivity, waitForAnnouncements } from './announcer.js';
 
 // Map of registered tools for direct execution or simulation harnesses
 const toolRegistry = new Map();
@@ -346,29 +346,16 @@ async function invokeToolByName(name, input) {
 }
 
 /**
- * Calculate comfortable pause duration based on utterance length (standard speech rate ~150-180 words/min)
- * @param {string} text
- * @returns {number} milliseconds
- */
-function getSpeechDelay(text) {
-  const wordCount = text.split(/\s+/).filter(Boolean).length;
-  // ~350ms per word + 800ms natural breathing cadence, minimum 2200ms
-  return Math.max(2200, wordCount * 380 + 800);
-}
-
-/**
  * End-to-end WebMCP simulation runner for test harnesses, console testing, and demo recording.
- * Executes the entire appointment booking pipeline with realistic speech-friendly pauses.
+ * Pacing is handled centrally by announce()'s serialized queue — no manual delays needed here.
  */
 export async function runAgentDemo() {
   console.log('%c[WebMCP Agent]%c Starting automated booking demonstration...', 'color: #1B6A58; font-weight: bold;', 'color: inherit;');
 
-  // Step 1: Search provider ("Provider found: Dr. Sarah Chen, Family Medicine.")
   console.log('[WebMCP] Calling search_providers({ name: "Chen" })...');
   await invokeToolByName('search_providers', { name: 'Chen' });
-  await new Promise((r) => setTimeout(r, getSpeechDelay('Provider found: Dr. Sarah Chen, Family Medicine.')));
+  await waitForAnnouncements();
 
-  // Step 2: List available slots ("6 available times found on Tuesday.")
   console.log('[WebMCP] Calling list_available_slots({ providerId: "p1", day: "Tuesday", timeRange: "morning" })...');
   const slotsResult = await invokeToolByName('list_available_slots', {
     providerId: 'p1',
@@ -376,22 +363,19 @@ export async function runAgentDemo() {
     timeRange: 'morning',
   });
   console.log('[WebMCP] Slots response:', slotsResult);
-  await new Promise((r) => setTimeout(r, getSpeechDelay('3 available times found on Tuesday.')));
+  await waitForAnnouncements();
 
-  // Step 3: Select slot ("Tuesday at 09:00 selected.")
   console.log('[WebMCP] Calling select_slot({ slotId: "s3" })...');
   await invokeToolByName('select_slot', { slotId: 's3' });
-  await new Promise((r) => setTimeout(r, getSpeechDelay('Tuesday at 09:00 selected.')));
+  await waitForAnnouncements();
 
-  // Step 4: Fill intake form ("Visit reason set to: Annual check-up.")
   console.log('[WebMCP] Calling fill_intake_form({ reason: "Annual check-up", notes: "Please check insurance card" })...');
   await invokeToolByName('fill_intake_form', {
     reason: 'Annual check-up',
     notes: 'Please check insurance card on arrival',
   });
-  await new Promise((r) => setTimeout(r, getSpeechDelay('Visit reason set to: Annual check-up.')));
+  await waitForAnnouncements();
 
-  // Step 5: Request submission ("Booking ready. Waiting for your confirmation before it is finalized.")
   console.log('[WebMCP] Calling submit_booking()... (Staging human confirmation gate)');
   await invokeToolByName('submit_booking', {});
   console.log('%c[WebMCP Agent]%c Booking staged. Awaiting human confirmation in modal.', 'color: #C9762B; font-weight: bold;', 'color: inherit;');

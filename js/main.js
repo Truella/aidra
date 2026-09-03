@@ -31,6 +31,12 @@ async function init() {
 function wireAgentDemoButton() {
   const btn = document.getElementById('run-agent-demo-btn');
   btn?.addEventListener('click', async () => {
+    // Blur the button in place rather than jumping focus across landmarks.
+    // NVDA announces "complementary landmark / main landmark" when focus
+    // crosses <aside> → <main>, which drowns out the first aria-live
+    // announcement. Blurring here is silent — the queue handles narration.
+    btn.blur();
+
     btn.setAttribute('disabled', 'true');
     btn.classList.add('opacity-50', 'cursor-not-allowed');
     try {
@@ -115,7 +121,9 @@ function wireManualResetButton() {
     }
     clearToolActivity();
     render();
-    document.getElementById('booking-status')?.focus();
+    // Blur away from the button so the screen reader stops tracking it.
+    // The aria-live announcement fires independently — no focus anchor needed.
+    button.blur();
     announce('Booking form and selected time slot have been reset.');
   });
 }
@@ -132,7 +140,11 @@ function wireConfirmModal() {
     markConfirmed();
     modal?.classList.add('hidden');
     render();
-    document.getElementById('booking-status')?.focus();
+    // Populate #booking-status before focusing so NVDA reads its text
+    // content rather than saying "blank" for an empty element.
+    const statusEl = document.getElementById('booking-status');
+    if (statusEl) statusEl.textContent = 'Appointment confirmed.';
+    statusEl?.focus();
     announce('Appointment confirmed and booked.');
   });
 
@@ -140,7 +152,9 @@ function wireConfirmModal() {
     state.bookingStatus = 'idle';
     modal?.classList.add('hidden');
     render();
-    document.getElementById('booking-status')?.focus();
+    const statusEl = document.getElementById('booking-status');
+    if (statusEl) statusEl.textContent = 'Booking cancelled.';
+    statusEl?.focus();
     announce('Booking cancelled. No appointment was made.');
   });
 }

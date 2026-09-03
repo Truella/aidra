@@ -146,7 +146,7 @@
               class="rounded-xl border border-ink/20 hover:bg-paper active:scale-[0.98] text-ink/70 hover:text-ink px-4 py-3 text-sm font-medium transition-all duration-150">
               Reset form
             </button>
-            <p id="booking-status" tabindex="-1" class="text-xs font-medium text-ink/70" role="status"></p>
+            <p id="booking-status" tabindex="-1" aria-label="Booking status" class="text-xs font-medium text-ink/70" role="status"></p>
           </div>
         </section>
       </div>
@@ -161,8 +161,9 @@
             </div>
             <div class="flex items-center gap-2">
               <button id="run-agent-demo-btn" type="button"
+                aria-label="Run agent demo"
                 class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-teal hover:bg-teal-hover active:scale-95 text-white transition-all shadow-sm">
-                <span>▶ Run Agent</span>
+                <span aria-hidden="true">▶ Run Agent</span>
               </button>
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-teal-soft text-teal border border-teal-border/40">
                 <span class="w-1.5 h-1.5 rounded-full bg-teal animate-pulse"></span>
