@@ -6,6 +6,11 @@ import { registerTools, runAgentDemo } from './tools.js';
 import { announce, clearToolActivity } from './announcer.js';
 
 async function init() {
+  // Replace data-lucide placeholders with SVG icons (Lucide via CDN).
+  // Module scripts run after the DOM is parsed, so all icons exist here.
+  const win = /** @type {Window & { lucide?: { createIcons: (options?: Record<string, unknown>) => void } }} */ (window);
+  if (win.lucide) win.lucide.createIcons();
+
   // Populate provider selector dropdown
   populateProviderSelector();
 
