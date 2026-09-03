@@ -63,10 +63,12 @@ export function renderCalendar(slots) {
  * @param {HTMLElement|null} [sourceCell] - the day-cell that triggered this, if from a drag
  * @param {import('./types.js').Slot[]} [allSlots]
  */
-export function applySlotSelection(slot, sourceCell = null, allSlots = []) {
+export function applySlotSelection(slot, sourceCell = null, allSlots = [], muteAnnounce = false) {
   selectSlot(slot);
   render({ highlight: 'calendar' });
-  announce(`${slot.day} at ${slot.time} selected.`);
+  if (!muteAnnounce) {
+    announce(`${slot.day} at ${slot.time} selected.`);
+  }
   markFilledCell(slot);
 }
 

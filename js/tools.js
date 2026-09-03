@@ -59,6 +59,7 @@ export async function registerTools() {
       );
 
       if (!match) {
+        announce(`No provider found matching "${name}".`);
         return { content: [{ type: 'text', text: `No provider found matching "${name}".` }] };
       }
 
@@ -93,7 +94,7 @@ export async function registerTools() {
       logToolActivity('list_providers');
       
       const summary = PROVIDERS.map(p => `${p.name} (${p.specialty}), id: ${p.id}`).join('\n');
-      announce(`Listed ${PROVIDERS.length} providers.`);
+      announce(`${PROVIDERS.length} providers found.`);
       
       return {
         content: [
@@ -169,10 +170,18 @@ export async function registerTools() {
       const { slotId } = parseInput(rawInput);
       const slot = SLOTS.find((s) => s.id === slotId);
       if (!slot) {
+        announce(`No slot found with that id.`);
         return { content: [{ type: 'text', text: `No slot found with id "${slotId}".` }] };
       }
 
-      applySlotSelection(slot);
+      const provider = PROVIDERS.find((p) => p.id === slot.providerId);
+      if (provider) {
+        selectProvider(provider);
+        announce(`${provider.name} selected. ${slot.day} at ${slot.time} selected.`);
+      } else {
+        announce(`${slot.day} at ${slot.time} selected.`);
+      }
+      applySlotSelection(slot, null, [], true);
 
       return { content: [{ type: 'text', text: `Selected ${slot.day} at ${slot.time}.` }] };
     },
@@ -197,11 +206,16 @@ export async function registerTools() {
       const { slotId } = parseInput(rawInput);
       const newSlot = SLOTS.find((s) => s.id === slotId);
       if (!newSlot) {
+        announce(`No slot found with that id.`);
         return { content: [{ type: 'text', text: `No slot found with id "${slotId}".` }] };
       }
 
       state.bookingStatus = 'idle';
-      applySlotSelection(newSlot);
+      const provider = PROVIDERS.find((p) => p.id === newSlot.providerId);
+      if (provider) {
+        selectProvider(provider);
+      }
+      applySlotSelection(newSlot, null, [], true);
       announce(`Appointment rescheduled to ${newSlot.day} at ${newSlot.time}. Ready to submit.`);
 
       return {
@@ -284,6 +298,7 @@ export async function registerTools() {
     async execute() {
       logToolActivity('submit_booking', 'Pending confirmation');
       if (!state.selectedProvider || !state.selectedSlot || !state.intakeForm.reason) {
+        announce('Cannot submit yet — a provider, time, and reason are all required.');
         return {
           content: [
             {
