@@ -39,7 +39,7 @@
 
 ## 🛠️ WebMCP Tools Specification
 
-`aidra` registers 6 typed WebMCP tools into the browser context:
+`aidra` registers 7 typed WebMCP tools into the browser context:
 
 | Tool Name | Parameters | Description |
 |---|---|---|
