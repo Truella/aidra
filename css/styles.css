@@ -1,4 +1,4 @@
-/* Screen-reader-only utility (Tailwind's CDN build doesn't include sr-only by default in all configs) */
+/* Screen-reader-only utility */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -25,48 +25,83 @@
   }
 }
 
-/* Agent-action highlight: briefly applied to a panel right after a tool call mutates it.
-   This is the visible "watch the agent work" device — deliberate, singular use of the amber accent. */
+/* Agent-action highlight: briefly applied to a panel right after a tool call mutates it */
 .agent-highlight {
-  box-shadow: 0 0 0 2px #C9762B;
-  transition: box-shadow 1.2s ease-out;
+  box-shadow: 0 0 0 2px #C9762B, 0 10px 15px -3px rgba(201, 118, 43, 0.15) !important;
+  border-color: rgba(201, 118, 43, 0.6) !important;
+  transition: all 0.3s ease-out;
 }
 
 /* Calendar day cell — drop target for dragged slot chips */
 .day-cell {
-  min-height: 88px;
-  border: 1px dashed rgba(26, 29, 27, 0.15);
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  font-size: 0.75rem;
-  color: rgba(26, 29, 27, 0.5);
+  min-height: 94px;
+  border: 1.5px dashed rgba(31, 111, 92, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(26, 29, 27, 0.55);
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.18s ease-in-out;
 }
 
 .day-cell.drag-over {
   border-color: #1F6F5C;
+  border-style: solid;
   background: #E4EDE9;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(31, 111, 92, 0.12);
 }
 
 .day-cell.filled {
   border-style: solid;
   border-color: #1F6F5C;
-  background: #E4EDE9;
-  color: #1A1D1B;
+  background: linear-gradient(135deg, #E4EDE9 0%, #d8e6e0 100%);
+  color: #14493D;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(31, 111, 92, 0.08);
 }
 
 /* Slot chip — draggable element in the tray */
 .slot-chip {
   cursor: grab;
   user-select: none;
-  border: 1px solid rgba(31, 111, 92, 0.3);
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(31, 111, 92, 0.25);
+  border-radius: 9999px;
+  padding: 0.4rem 0.85rem;
   font-size: 0.75rem;
+  font-weight: 500;
+  color: #1A1D1B;
   background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.slot-chip::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #1F6F5C;
+}
+
+.slot-chip:hover {
+  border-color: #1F6F5C;
+  background: #F4F7F5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(31, 111, 92, 0.1);
 }
 
 .slot-chip:active {
   cursor: grabbing;
+  transform: scale(0.97);
 }
 
 .slot-chip[draggable="true"] {

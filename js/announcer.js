@@ -47,10 +47,13 @@ export function logToolActivity(toolName, status = '') {
 
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const row = document.createElement('div');
-  row.className = 'flex items-center justify-between py-1.5 border-b border-ink/5 last:border-none text-xs';
+  row.className = 'flex items-center justify-between py-2 border-b border-ink/5 last:border-none text-xs';
   row.innerHTML = `
-    <span class="font-mono text-teal font-medium">${toolName}</span>
-    <span class="text-ink/50 text-[11px]">${status || time}</span>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-teal"></span>
+      <span class="font-mono text-teal font-semibold text-[11px] bg-teal-soft/60 px-1.5 py-0.5 rounded border border-teal-border/40">${toolName}</span>
+    </div>
+    <span class="text-ink/40 text-[10px] font-medium">${status || time}</span>
   `;
 
   logList.appendChild(row);
