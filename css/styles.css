@@ -1,0 +1,74 @@
+/* Screen-reader-only utility (Tailwind's CDN build doesn't include sr-only by default in all configs) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible keyboard focus everywhere — do not remove default outlines */
+:focus-visible {
+  outline: 2px solid #1F6F5C;
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Agent-action highlight: briefly applied to a panel right after a tool call mutates it.
+   This is the visible "watch the agent work" device — deliberate, singular use of the amber accent. */
+.agent-highlight {
+  box-shadow: 0 0 0 2px #C9762B;
+  transition: box-shadow 1.2s ease-out;
+}
+
+/* Calendar day cell — drop target for dragged slot chips */
+.day-cell {
+  min-height: 88px;
+  border: 1px dashed rgba(26, 29, 27, 0.15);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(26, 29, 27, 0.5);
+}
+
+.day-cell.drag-over {
+  border-color: #1F6F5C;
+  background: #E4EDE9;
+}
+
+.day-cell.filled {
+  border-style: solid;
+  border-color: #1F6F5C;
+  background: #E4EDE9;
+  color: #1A1D1B;
+}
+
+/* Slot chip — draggable element in the tray */
+.slot-chip {
+  cursor: grab;
+  user-select: none;
+  border: 1px solid rgba(31, 111, 92, 0.3);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  background: white;
+}
+
+.slot-chip:active {
+  cursor: grabbing;
+}
+
+.slot-chip[draggable="true"] {
+  touch-action: none;
+}
